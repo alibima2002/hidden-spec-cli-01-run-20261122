@@ -32,6 +32,11 @@ class Fail {
 
 const blank = (s: string): boolean => s.trim() === '';
 
+/** Index of the first non-blank line, or -1 when every line is blank. */
+function firstNonBlank(lines: string[]): number {
+  return lines.findIndex((l) => !blank(l));
+}
+
 function patchLines(text: string): string[] {
   if (text === '') return [];
   const lines = text.split('\n');
@@ -68,7 +73,7 @@ class Tree {
 type Edit = (tree: Tree) => void;
 
 function detect(lines: string[]): string | null {
-  const first = lines.findIndex((l) => !blank(l));
+  const first = firstNonBlank(lines);
   if (first < 0) return null;
   if (lines[first]!.trim() === '*** Begin Patch') return 'v4a';
   const c = lines[first]!.trimStart()[0];
@@ -253,7 +258,7 @@ function jsonEdit(v: unknown): Edit | null {
 }
 
 function jsonEdits(text: string, lines: string[]): Edit[] {
-  const first = lines.findIndex((l) => !blank(l));
+  const first = firstNonBlank(lines);
   if (first < 0) throw new Exit2('error: parse 1');
   const edits: Edit[] = [];
   if (lines[first]!.trimStart().startsWith('[')) {
@@ -667,7 +672,7 @@ function v4aUpdateEdit(path: string, moveTo: string | null, chunks: VChunk[], st
 }
 
 function v4aEdits(lines: string[], strict: boolean): Edit[] {
-  const first = lines.findIndex((l) => !blank(l));
+  const first = firstNonBlank(lines);
   if (first < 0) throw new Exit2('error: parse 1');
   if (lines[first]!.trim() !== '*** Begin Patch') throw new Exit2(`error: parse ${first + 1}`);
   let last = -1;
